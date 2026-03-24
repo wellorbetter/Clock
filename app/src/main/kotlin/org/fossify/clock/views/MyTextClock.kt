@@ -7,9 +7,13 @@ import android.text.style.RelativeSizeSpan
 import android.util.AttributeSet
 import android.widget.TextClock
 import androidx.annotation.AttrRes
+import org.fossify.clock.R
 import org.fossify.clock.extensions.config
+import org.fossify.clock.extensions.getFormattedDate
 import org.fossify.commons.extensions.applyFontToTextView
 import java.text.DateFormatSymbols
+import java.util.Calendar
+import androidx.core.content.withStyledAttributes
 
 private const val AM_PM_SCALE = 0.4f
 
@@ -19,9 +23,8 @@ class MyTextClock @JvmOverloads constructor(
     @AttrRes defStyleAttr: Int = android.R.attr.textViewStyle,
 ) : TextClock(context, attrs, defStyleAttr) {
 
-    init {
-        if (!isInEditMode) context.applyFontToTextView(this)
-    }
+    private var useLocalizedDateFormat = false
+    private var reenter = false
 
     private val amPmStrings by lazy {
         DateFormatSymbols.getInstance(
@@ -29,11 +32,25 @@ class MyTextClock @JvmOverloads constructor(
         ).amPmStrings
     }
 
-    private var reenter = false
+    init {
+        if (!isInEditMode) context.applyFontToTextView(this)
+
+        attrs?.let {
+            context.withStyledAttributes(it, R.styleable.MyTextClock, defStyleAttr, 0) {
+                useLocalizedDateFormat = getBoolean(R.styleable.MyTextClock_useLocalizedDateFormat, false)
+            }
+        }
+    }
 
     override fun setText(text: CharSequence?, type: BufferType?) {
         if (reenter) {
             super.setText(text, type)
+            return
+        }
+
+        if (useLocalizedDateFormat) {
+            val formattedDate = context.getFormattedDate(Calendar.getInstance())
+            super.setText(formattedDate, type)
             return
         }
 
