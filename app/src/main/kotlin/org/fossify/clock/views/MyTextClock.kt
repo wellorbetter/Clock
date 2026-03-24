@@ -59,46 +59,51 @@ class MyTextClock @JvmOverloads constructor(
             return
         }
 
-        val full = text.toString()
-        var amPmPosition = -1
-        var amPmString: String? = null
-        for (s in amPmStrings) {
-            if (s.isNotEmpty()) {
-                val i = full.indexOf(s, ignoreCase = true)
-                if (i != -1) {
-                    amPmPosition = i
-                    amPmString = s
-                    break
-                }
-            }
-        }
-
-        if (amPmPosition != -1 && amPmString != null) {
-            val spannable = SpannableString(text)
-            val startIndex = if (amPmPosition > 0 && full[amPmPosition - 1].isWhitespace()) {
-                amPmPosition - 1
-            } else {
-                amPmPosition
-            }
-            val endIndex = amPmPosition + amPmString.length
-            if (startIndex < endIndex) {
-                spannable.setSpan(
-                    RelativeSizeSpan(AM_PM_SCALE),
-                    startIndex,
-                    endIndex,
-                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-            }
-
-            reenter = true
-
-            try {
-                super.setText(spannable, type ?: BufferType.SPANNABLE)
-            } finally {
-                reenter = false
-            }
+        val amPmInfo = findAmPmInfo(text.toString())
+        if (amPmInfo != null) {
+            setTextWithAmPmScaled(text, amPmInfo, type)
         } else {
             super.setText(text, type)
         }
     }
+
+    private fun findAmPmInfo(fullText: String): AmPmInfo? {
+        for (s in amPmStrings) {
+            if (s.isNotEmpty()) {
+                val i = fullText.indexOf(s, ignoreCase = true)
+                if (i != -1) {
+                    return AmPmInfo(i, s)
+                }
+            }
+        }
+        return null
+    }
+
+    private fun setTextWithAmPmScaled(text: CharSequence?, amPmInfo: AmPmInfo, type: BufferType?) {
+        val full = text.toString()
+        val spannable = SpannableString(text)
+        val startIndex = if (amPmInfo.position > 0 && full[amPmInfo.position - 1].isWhitespace()) {
+            amPmInfo.position - 1
+        } else {
+            amPmInfo.position
+        }
+        val endIndex = amPmInfo.position + amPmInfo.string.length
+        if (startIndex < endIndex) {
+            spannable.setSpan(
+                RelativeSizeSpan(AM_PM_SCALE),
+                startIndex,
+                endIndex,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
+
+        reenter = true
+        try {
+            super.setText(spannable, type ?: BufferType.SPANNABLE)
+        } finally {
+            reenter = false
+        }
+    }
+
+    private data class AmPmInfo(val position: Int, val string: String)
 }
