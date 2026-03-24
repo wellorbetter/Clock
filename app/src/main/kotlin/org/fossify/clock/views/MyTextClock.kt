@@ -23,15 +23,6 @@ class MyTextClock @JvmOverloads constructor(
     @AttrRes defStyleAttr: Int = android.R.attr.textViewStyle,
 ) : TextClock(context, attrs, defStyleAttr) {
 
-    private var useLocalizedDateFormat = false
-    private var reenter = false
-
-    private val amPmStrings by lazy {
-        DateFormatSymbols.getInstance(
-            resources.configuration.locales[0]
-        ).amPmStrings
-    }
-
     init {
         if (!isInEditMode) context.applyFontToTextView(this)
 
@@ -41,6 +32,15 @@ class MyTextClock @JvmOverloads constructor(
             }
         }
     }
+
+    private val amPmStrings by lazy {
+        DateFormatSymbols.getInstance(
+            resources.configuration.locales[0]
+        ).amPmStrings
+    }
+
+    private var reenter = false
+    private var useLocalizedDateFormat = false
 
     override fun setText(text: CharSequence?, type: BufferType?) {
         if (reenter) {
