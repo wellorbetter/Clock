@@ -109,7 +109,6 @@ class ClockFragment : Fragment() {
     private fun updateDate() {
         calendar = Calendar.getInstance()
         val formattedDate = requireContext().getFormattedDate(calendar)
-        binding.clockDate.text = formattedDate
         (binding.timeZonesList.adapter as? TimeZonesAdapter)?.todayDateString = formattedDate
     }
 
