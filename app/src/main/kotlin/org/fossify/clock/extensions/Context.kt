@@ -567,7 +567,7 @@ fun Context.isUriAccessible(uri: Uri): Boolean {
     return try {
         this.contentResolver.openAssetFileDescriptor(uri, "r")?.close()
         true
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         false
     }
 }
@@ -577,7 +577,7 @@ fun Context.isUriAccessible(uriString: String): Boolean {
     return try {
         val uri = uriString.toUri()
         isUriAccessible(uri)
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         false
     }
 }
